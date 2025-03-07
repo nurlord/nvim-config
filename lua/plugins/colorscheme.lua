@@ -24,6 +24,21 @@ return {
   ]]
   --
   {
+    "folke/tokyonight.nvim",
+    lazy = true,
+    priority = 1000,
+    opts = function()
+      return {
+        -- transparent = true,
+        -- styles = {
+        --   sidebars = "transparent",
+        --   floats = "transparent",
+        -- },
+        style = "night",
+      }
+    end,
+  },
+  {
     "catppuccin/nvim",
     lazy = true,
     name = "catppuccin",
@@ -32,23 +47,8 @@ return {
   {
     "LazyVim/LazyVim",
     opts = {
-      colorscheme = "onedark",
+      -- colorscheme = "onedark",
+      colorscheme = "tokyonight",
     },
   },
 }
-
---return {
---  "folke/tokyonight.nvim",
---  lazy = true,
---  priority = 1000,
---  opts = function()
---    return {
---      transparent = true,
---      styles = {
---        sidebars = "transparent",
---        floats = "transparent",
---      },
---      style = "night",
---    }
---  end,
---}

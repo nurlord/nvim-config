@@ -5,7 +5,6 @@ return {
       ensure_installed = {
         "stylua",
         "shfmt",
-        --"flake8",
         "selene",
         "tailwindcss-language-server",
         --"typescript-language-server",
@@ -16,13 +15,9 @@ return {
         "html-lsp",
         "prettier",
         "intelephense",
-        --"phpstan",
-        --"pint",
-        --"blade-formatter",
         "docker-compose-language-service",
         "dockerfile-language-server",
         "dot-language-server",
-        "emmet-ls",
       },
 
       automatic_installation = false,

@@ -1,5 +1,14 @@
 return {
   {
+    "saghen/blink.cmp",
+    opts = {
+      completion = {
+        list = { selection = { preselect = true, auto_insert = false } },
+      },
+      keymap = { preset = "super-tab" },
+    },
+  },
+  {
     "williamboman/mason.nvim",
     opts = {
       ensure_installed = {
@@ -50,6 +59,42 @@ return {
       opts = function(_, opts)
         opts.servers = {
           jdtls = {},
+          clangd = {
+            keys = {
+              { "<leader>ch", "<cmd>ClangdSwitchSourceHeader<cr>", desc = "Switch Source/Header (C/C++)" },
+            },
+            root_dir = function(fname)
+              return require("lspconfig.util").root_pattern(
+                "Makefile",
+                "configure.ac",
+                "configure.in",
+                "config.h.in",
+                "meson.build",
+                "meson_options.txt",
+                "build.ninja"
+              )(fname) or require("lspconfig.util").root_pattern(
+                "compile_commands.json",
+                "compile_flags.txt"
+              )(fname) or vim.fs.dirname(vim.fs.find(".git", { path = fname, upward = true })[1])
+            end,
+            capabilities = {
+              offsetEncoding = { "utf-16" },
+            },
+            cmd = {
+              "clangd",
+              "--background-index",
+              "--clang-tidy",
+              "--header-insertion=iwyu",
+              "--completion-style=detailed",
+              "--function-arg-placeholders",
+              "--fallback-style=llvm",
+            },
+            init_options = {
+              usePlaceholders = true,
+              completeUnimported = true,
+              clangdFileStatus = true,
+            },
+          },
         }
         opts.setup = {
           jdtls = function()
@@ -81,7 +126,6 @@ return {
         events = { "BufWritePost", "BufReadPost", "InsertLeave" },
         linters_by_ft = {
           fish = { "fish" },
-          yaml = { "eslint" },
           -- Use the "*" filetype to run linters on all filetypes.
           -- ['*'] = { 'global linter' },
           -- Use the "_" filetype to run linters on filetypes that don't have other linters configured.
@@ -102,6 +146,21 @@ return {
           -- },
         },
       },
+    },
+
+    {
+      "rafamadriz/friendly-snippets",
+      opts = {
+        exclude = { "javascript", "typescript" },
+      },
+    },
+    {
+      "akinsho/flutter-tools.nvim",
+      dependencies = {
+        "nvim-lua/plenary.nvim",
+        "stevearc/dressing.nvim",
+      },
+      config = true,
     },
   },
 }

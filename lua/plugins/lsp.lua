@@ -27,6 +27,9 @@ return {
         "docker-compose-language-service",
         "dockerfile-language-server",
         "dot-language-server",
+        "eslint-lsp",
+        "dart-debug-adapter",
+        "vue-language-server",
       },
 
       automatic_installation = false,

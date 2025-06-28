@@ -1,40 +1,53 @@
 return {
   {
     "saghen/blink.cmp",
-    opts = {
-      completion = {
-        list = { selection = { preselect = true, auto_insert = false } },
-      },
-      keymap = { preset = "super-tab" },
-    },
-  },
-  {
-    "williamboman/mason.nvim",
-    opts = {
-      ensure_installed = {
-        "stylua",
-        "shfmt",
-        "selene",
-        "tailwindcss-language-server",
-        --"typescript-language-server",
-        "vtsls",
-        "css-lsp",
-        "css-variables-language-server",
-        "cssmodules-language-server",
-        "html-lsp",
-        "prettier",
-        "intelephense",
-        "docker-compose-language-service",
-        "dockerfile-language-server",
-        "dot-language-server",
-        "eslint-lsp",
-        "dart-debug-adapter",
-        "vue-language-server",
-      },
+    opts = function(_, opts)
+      -- opts.completion = {
+      --   list = { selection = { preselect = true, auto_insert = false } },
+      -- }
 
-      automatic_installation = false,
-    },
+      opts.keymap["<Tab>"] = {
+        require("blink.cmp.keymap.presets").get("super-tab")["<Tab>"][1],
+        LazyVim.cmp.map({ "snippet_forward", "ai_accept" }),
+        "fallback",
+      }
+    end,
+
+    -- opts = {
+    --   completion = {
+    --     list = { selection = { preselect = true, auto_insert = false } },
+    --   },
+    --   keymap = { preset = "super-tab" },
+    -- },
   },
+
+  -- {
+  --   "williamboman/mason.nvim",
+  --   opts = {
+  --     ensure_installed = {
+  --       "stylua",
+  --       "shfmt",
+  --       "selene",
+  --       "tailwindcss-language-server",
+  --       --"typescript-language-server",
+  --       "vtsls",
+  --       "css-lsp",
+  --       "css-variables-language-server",
+  --       "cssmodules-language-server",
+  --       "html-lsp",
+  --       "prettier",
+  --       "intelephense",
+  --       "docker-compose-language-service",
+  --       "dockerfile-language-server",
+  --       "dot-language-server",
+  --       "eslint-lsp",
+  --       "dart-debug-adapter",
+  --       "vue-language-server",
+  --     },
+  --
+  --     automatic_installation = false,
+  --   },
+  -- },
   {
     "stevearc/conform.nvim",
     opts = {
@@ -54,6 +67,24 @@ return {
         yaml = { "prettier", stop_after_first = true },
         markdown = { "prettier", stop_after_first = true },
         graphql = { "prettier", stop_after_first = true },
+        astro = { "prettier", stop_after_first = true },
+      },
+      formatters = {
+        prettier = {
+          args = function(self, ctx)
+            if vim.endswith(ctx.filename, ".astro") then
+              return {
+                "--stdin-filepath",
+                "$FILENAME",
+                "--plugin",
+                "prettier-plugin-astro",
+                "--plugin",
+                "prettier-plugin-tailwindcss",
+              }
+            end
+            return { "--stdin-filepath", "$FILENAME", "--plugin", "prettier-plugin-tailwindcss" }
+          end,
+        },
       },
     },
     {
@@ -116,10 +147,6 @@ return {
           },
         })
       end,
-    },
-    {
-      "mfussenegger/nvim-jdtls",
-      opts = {},
     },
     {
       "mfussenegger/nvim-lint",

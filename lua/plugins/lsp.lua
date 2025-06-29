@@ -2,23 +2,16 @@ return {
   {
     "saghen/blink.cmp",
     opts = function(_, opts)
-      -- opts.completion = {
-      --   list = { selection = { preselect = true, auto_insert = false } },
-      -- }
-
       opts.keymap["<Tab>"] = {
         require("blink.cmp.keymap.presets").get("super-tab")["<Tab>"][1],
         LazyVim.cmp.map({ "snippet_forward", "ai_accept" }),
         "fallback",
       }
+      opts.sources = {
+        default = { "lsp", "path", "snippets" },
+      }
+      opts.completion.list = { selection = { preselect = true, auto_insert = false } }
     end,
-
-    -- opts = {
-    --   completion = {
-    --     list = { selection = { preselect = true, auto_insert = false } },
-    --   },
-    --   keymap = { preset = "super-tab" },
-    -- },
   },
 
   -- {

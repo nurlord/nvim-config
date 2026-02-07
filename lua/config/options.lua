@@ -35,3 +35,8 @@ vim.opt.syntax = "off"
 vim.o.foldenable = false
 vim.g.loaded_ruby_provider = 0
 vim.g.loaded_perl_provider = 0
+
+-- remove vertical lines
+vim.o.fillchars = "vert: ,eob: "
+vim.api.nvim_set_hl(0, "WinSeparator", { fg = "bg" })
+vim.api.nvim_set_hl(1, "EndOfBuffer", { fg = "bg" })

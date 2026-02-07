@@ -14,6 +14,23 @@ return {
     end,
   },
 
+  {
+    "nvim-treesitter/nvim-treesitter",
+    dependencies = {
+      "vrischmann/tree-sitter-templ",
+    },
+
+    opts = function(_, opts)
+      -- add tsx and treesitter
+      vim.list_extend(opts.ensure_installed, {
+        "tsx",
+        "typescript",
+        "go",
+        "templ",
+        "gotmpl",
+      })
+    end,
+  },
   -- {
   --   "williamboman/mason.nvim",
   --   opts = {
@@ -55,6 +72,9 @@ return {
         scss = { "prettier", stop_after_first = true },
         less = { "prettier", stop_after_first = true },
         html = { "prettier", stop_after_first = true },
+        template = { "templ" },
+        templ = { "templ" },
+        tmpl = { "templ" },
         json = { "prettier", stop_after_first = true },
         jsonc = { "prettier", stop_after_first = true },
         yaml = { "prettier", stop_after_first = true },
@@ -78,6 +98,20 @@ return {
             return { "--stdin-filepath", "$FILENAME", "--plugin", "prettier-plugin-tailwindcss" }
           end,
         },
+        prettier_go_tmpl = {
+          command = "prettier",
+          stdin = true,
+          args = {
+            "--stdin-filepath",
+            "$FILENAME",
+            "--parser",
+            "go-template",
+            "--plugin",
+            "prettier-plugin-go-template",
+            "--plugin",
+            "prettier-plugin-tailwindcss",
+          },
+        },
       },
     },
     {
@@ -86,59 +120,66 @@ return {
       opts = function(_, opts)
         opts.servers = {
           jdtls = {},
-          clangd = {
+          gopls = {
             keys = {
-              { "<leader>ch", "<cmd>ClangdSwitchSourceHeader<cr>", desc = "Switch Source/Header (C/C++)" },
-            },
-            root_dir = function(fname)
-              return require("lspconfig.util").root_pattern(
-                "Makefile",
-                "configure.ac",
-                "configure.in",
-                "config.h.in",
-                "meson.build",
-                "meson_options.txt",
-                "build.ninja"
-              )(fname) or require("lspconfig.util").root_pattern(
-                "compile_commands.json",
-                "compile_flags.txt"
-              )(fname) or vim.fs.dirname(vim.fs.find(".git", { path = fname, upward = true })[1])
-            end,
-            capabilities = {
-              offsetEncoding = { "utf-16" },
-            },
-            cmd = {
-              "clangd",
-              "--background-index",
-              "--clang-tidy",
-              "--header-insertion=iwyu",
-              "--completion-style=detailed",
-              "--function-arg-placeholders",
-              "--fallback-style=llvm",
-            },
-            init_options = {
-              usePlaceholders = true,
-              completeUnimported = true,
-              clangdFileStatus = true,
+              { "gd", vim.lsp.buf.references, desc = "Go to references" },
+              { "<leader>ca", vim.lsp.buf.code_action, desc = "Code actions", has = "codeAction" },
             },
           },
+          templ = {},
+          --   clangd = {
+          --     keys = {
+          --       { "<leader>ch", "<cmd>ClangdSwitchSourceHeader<cr>", desc = "Switch Source/Header (C/C++)" },
+          --     },
+          --     root_dir = function(fname)
+          --       return require("lspconfig.util").root_pattern(
+          --         "Makefile",
+          --         "configure.ac",
+          --         "configure.in",
+          --         "config.h.in",
+          --         "meson.build",
+          --         "meson_options.txt",
+          --         "build.ninja"
+          --       )(fname) or require("lspconfig.util").root_pattern(
+          --         "compile_commands.json",
+          --         "compile_flags.txt"
+          --       )(fname) or vim.fs.dirname(vim.fs.find(".git", { path = fname, upward = true })[1])
+          --     end,
+          --     capabilities = {
+          --       offsetEncoding = { "utf-16" },
+          --     },
+          --     cmd = {
+          --       "clangd",
+          --       "--background-index",
+          --       "--clang-tidy",
+          --       "--header-insertion=iwyu",
+          --       "--completion-style=detailed",
+          --       "--function-arg-placeholders",
+          --       "--fallback-style=llvm",
+          --     },
+          --     init_options = {
+          --       usePlaceholders = true,
+          --       completeUnimported = true,
+          --       clangdFileStatus = true,
+          --     },
+          --   },
+          -- }
+          -- opts.setup = {
+          --   jdtls = function()
+          --     return true -- avoid duplicate servers
+          --   end,
+          -- }
+          -- local on_publish_diagnostics = vim.lsp.diagnostic.on_publish_diagnostics
+          -- opts.servers.bashls = vim.tbl_deep_extend("force", opts.servers.bashls or {}, {
+          --   handlers = {
+          --     ["textDocument/publishDiagnostics"] = function(err, res, ...)
+          --       local file_name = vim.fn.fnamemodify(vim.uri_to_fname(res.uri), ":t")
+          --       if string.match(file_name, "^%.env") == nil then
+          --         return on_publish_diagnostics(err, res, ...)
+          --       end
+          --     end,
+          --   },
         }
-        opts.setup = {
-          jdtls = function()
-            return true -- avoid duplicate servers
-          end,
-        }
-        local on_publish_diagnostics = vim.lsp.diagnostic.on_publish_diagnostics
-        opts.servers.bashls = vim.tbl_deep_extend("force", opts.servers.bashls or {}, {
-          handlers = {
-            ["textDocument/publishDiagnostics"] = function(err, res, ...)
-              local file_name = vim.fn.fnamemodify(vim.uri_to_fname(res.uri), ":t")
-              if string.match(file_name, "^%.env") == nil then
-                return on_publish_diagnostics(err, res, ...)
-              end
-            end,
-          },
-        })
       end,
     },
     {
@@ -149,6 +190,7 @@ return {
         events = { "BufWritePost", "BufReadPost", "InsertLeave" },
         linters_by_ft = {
           fish = { "fish" },
+          markdown = {},
           -- Use the "*" filetype to run linters on all filetypes.
           -- ['*'] = { 'global linter' },
           -- Use the "_" filetype to run linters on filetypes that don't have other linters configured.
@@ -167,6 +209,16 @@ return {
           --     return vim.fs.find({ "selene.toml" }, { path = ctx.filename, upward = true })[1]
           --   end,
           -- },
+          shellcheck = {
+            -- We must include the default args "--format=json" and "-" (stdin)
+            -- plus our custom exclusion "-e SC2034"
+            args = { "--format", "json", "-", "-e", "SC2034" },
+          },
+          golangcilint = {
+            cmd = "golangci-lint",
+            args = { "run", "--out-format", "json" },
+            ignore_exitcode = true, -- 👈 this mutes the warning
+          },
         },
       },
     },
